@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bertie’s Book Shop</title>
+    <style>
+        body { font-family: Arial; margin: 40px; background: #f9f9f9; }
+        table { width: 60%; margin: auto; border-collapse: collapse; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+        th { background-color: #eee; }
+    </style>
+</head>
+<body>
+    <h1>Bertie’s Book Shop</h1>
+    <table>
+        <tr><th>Book Name</th><th>Price</th></tr>
+        <% availableBooks.forEach(function(book) { %>
+            <tr>
+                <td><%= book.name %></td>
+                <td>£<%= book.price %></td>
+            </tr>
+        <% }); %>
+    </table>
+</body>
+</html>
