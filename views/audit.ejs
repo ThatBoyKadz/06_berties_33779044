@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Audit</title>
+</head>
+<body>
+<h1>Login Audit History</h1>
+<table border="1" cellpadding="5">
+    <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Success</th>
+        <th>Timestamp</th>
+    </tr>
+    <% audits.forEach(function(audit){ %>
+        <tr>
+            <td><%= audit.id %></td>
+            <td><%= audit.username %></td>
+            <td><%= audit.success ? "Yes" : "No" %></td>
+            <td><%= audit.timestamp.toLocaleString() %></td>
+        </tr>
+    <% }) %>
+</table>
+</body>
+</html>

@@ -98,5 +98,22 @@ router.get('/bargainbooks', function (req, res, next) {
 // ----------------------------
 // EXPORT ROUTER
 // ----------------------------
+router.get('/users/list', function (req, res, next) {
+    const sql = "SELECT username, first, last, email FROM users";
+
+    db.query(sql, function (err, results) {
+        if (err) return next(err);
+        res.render("users_list.ejs", { users: results });
+    });
+});
+
+
+router.get("/audit", function (req, res, next) {
+    const sql = "SELECT * FROM audit ORDER BY timestamp DESC";
+    db.query(sql, function (err, results) {
+        if (err) return next(err);
+        res.render("audit.ejs", { audits: results });
+    });
+});
 
 module.exports = router;
