@@ -30,54 +30,54 @@ router.get("/register", function (req, res) {
 // POST: Registered (with validation)
 // ------------------------
 router.post(
-  "/registered",
-  [
-    check("email").isEmail().withMessage("Please enter a valid email."),
-    check("username")
-      .isLength({ min: 5, max: 20 })
-      .withMessage("Username must be 5–20 characters."),
-    check("password").isLength({ min: 5 }).withMessage("Password must be at least 5 characters."),
-    check("first").notEmpty().withMessage("First name is required."),
-    check("last").notEmpty().withMessage("Last name is required.")
-  ],
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      // Pass errors and old input to template
-      return res.render("register", {
-        errors: errors.array(),
-        shopData: { shopName: "My Shop" },
-        oldInput: req.body
-      });
+    "/registered",
+    [
+        check("email").isEmail().withMessage("Please enter a valid email."),
+        check("username")
+            .isLength({ min: 5, max: 20 })
+            .withMessage("Username must be 5–20 characters."),
+        check("password")
+            .isLength({ min: 8 })
+            .withMessage("Password must be at least 8 characters."),
+        check("first").notEmpty().withMessage("First name is required."),
+        check("last").notEmpty().withMessage("Last name is required.")
+    ],
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            // Pass errors and old input to template
+            return res.render("register", {
+                errors: errors.array(),
+                shopData: { shopName: "My Shop" },
+                oldInput: req.body
+            });
+        }
+
+        const { username, password, first, last, email } = req.body;
+
+        bcrypt.hash(password, saltRounds, (err, hashedPassword) => {
+            if (err) return next(err);
+
+            const sql = `
+                INSERT INTO users (username, first, last, email, hashedPassword)
+                VALUES (?, ?, ?, ?, ?)
+            `;
+            const params = [username, first, last, email, hashedPassword];
+
+            db.query(sql, params, (err, result) => {
+                if (err) return next(err);
+
+                const output = `
+                    <h2>Hello ${first} ${last}, you are now registered!</h2>
+                    <p>Your password is: ${password}</p>
+                    <p>Your hashed password is: ${hashedPassword}</p>
+                    <p><a href="/users/login">Click here to login</a></p>
+                `;
+                res.send(output);
+            });
+        });
     }
-
-    // No validation errors → continue with registration
-    const { username, password, first, last, email } = req.body;
-
-    bcrypt.hash(password, saltRounds, (err, hashedPassword) => {
-      if (err) return next(err);
-
-      const sql = `
-        INSERT INTO users (username, first, last, email, hashedPassword)
-        VALUES (?, ?, ?, ?, ?)
-      `;
-      const params = [username, first, last, email, hashedPassword];
-
-      db.query(sql, params, (err, result) => {
-        if (err) return next(err);
-
-        const output = `
-          <h2>Hello ${first} ${last}, you are now registered!</h2>
-          <p>Your password is: ${password}</p>
-          <p>Your hashed password is: ${hashedPassword}</p>
-          <p><a href="/users/login">Click here to login</a></p>
-        `;
-        res.send(output);
-      });
-    });
-  }
 );
-
 
 // ------------------------
 // GET: List Users (protected)
@@ -120,7 +120,6 @@ router.post("/loggedin", function (req, res, next) {
             if (err2) console.error("Audit logging error:", err2);
 
             if (success) {
-                // --- Save user session here ---
                 req.session.userId = user.id;
                 req.session.username = username;
                 res.send(`Login successful! Welcome back ${user.first} ${user.last}.`);
@@ -150,16 +149,25 @@ router.get("/dashboard", redirectLogin, (req, res) => {
 });
 
 // ------------------------
-// POST: Logout (protected)
+// GET: Logout (protected, works with link)
 // ------------------------
-// GET: Logout (protected)
 router.get("/logout", redirectLogin, (req, res) => {
     req.session.destroy(err => {
         if (err) return res.redirect("/users/dashboard");
-        res.clearCookie("connect.sid"); // clear session cookie
+        res.clearCookie("connect.sid");
         res.redirect("/users/login");
     });
 });
 
+// ------------------------
+// POST: Logout (protected, works with form)
+// ------------------------
+router.post("/logout", redirectLogin, (req, res) => {
+    req.session.destroy(err => {
+        if (err) return res.redirect("/users/dashboard");
+        res.clearCookie("connect.sid");
+        res.redirect("/users/login");
+    });
+});
 
 module.exports = router;
