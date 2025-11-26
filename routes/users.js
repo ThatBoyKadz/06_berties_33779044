@@ -152,14 +152,14 @@ router.get("/dashboard", redirectLogin, (req, res) => {
 // ------------------------
 // POST: Logout (protected)
 // ------------------------
-router.post("/logout", redirectLogin, (req, res) => {
+// GET: Logout (protected)
+router.get("/logout", redirectLogin, (req, res) => {
     req.session.destroy(err => {
-        if (err) {
-            return res.redirect("/users/dashboard");
-        }
+        if (err) return res.redirect("/users/dashboard");
         res.clearCookie("connect.sid"); // clear session cookie
         res.redirect("/users/login");
     });
 });
+
 
 module.exports = router;
