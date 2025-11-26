@@ -1,29 +1,37 @@
-// Create a new router
+// books.js
 const express = require("express");
 const router = express.Router();
+
+// ------------------------
+// Middleware: Protect routes
+// ------------------------
+const redirectLogin = (req, res, next) => {
+    if (!req.session.userId) {
+        res.redirect("../users/login"); // redirect to login if not logged in
+    } else {
+        next(); // continue to the route handler
+    }
+};
 
 // ----------------------------
 // SEARCH ROUTES
 // ----------------------------
 
 // Display search form
-router.get('/search', function (req, res, next) {
+router.get('/search', redirectLogin, function (req, res, next) {
     res.render("search.ejs");
 });
 
 // Handle search results (advanced: partial match)
-router.get('/search-result', function (req, res, next) {
+router.get('/search-result', redirectLogin, function (req, res, next) {
     const keyword = req.query.keyword;  // get the keyword from the form
 
-    // If no keyword entered
     if (!keyword || keyword.trim() === "") {
         return res.send("❌ Please enter a book name to search.");
     }
 
-    // SQL query for partial match search
     const sqlquery = "SELECT * FROM books WHERE name LIKE ?";
 
-    // Execute query
     db.query(sqlquery, ['%' + keyword + '%'], (err, result) => {
         if (err) {
             console.error("Database error:", err);
@@ -35,31 +43,27 @@ router.get('/search-result', function (req, res, next) {
 });
 
 // ----------------------------
-// LIST ALL BOOKS
+// LIST ALL BOOKS (protected)
 // ----------------------------
-
-router.get('/list', function (req, res, next) {
-    const sqlquery = "SELECT * FROM books"; // query database to get all the books
+router.get('/list', redirectLogin, function (req, res, next) {
+    const sqlquery = "SELECT * FROM books";
     db.query(sqlquery, (err, result) => {
         if (err) {
             console.error("Database error:", err);
-            return res.redirect('/'); // redirect home if there’s an error
+            return res.redirect('/');
         }
         res.render("list.ejs", { availableBooks: result });
     });
 });
 
 // ----------------------------
-// ADD BOOK
+// ADD BOOK (protected)
 // ----------------------------
-
-// Display Add Book form
-router.get('/addbook', function (req, res, next) {
+router.get('/addbook', redirectLogin, function (req, res, next) {
     res.render("addbook.ejs");
 });
 
-// Handle Add Book form submission
-router.post('/bookadded', function (req, res, next) {
+router.post('/bookadded', redirectLogin, function (req, res, next) {
     const sqlquery = "INSERT INTO books (name, price) VALUES (?, ?)";
     const newrecord = [req.body.name, req.body.price];
 
@@ -79,10 +83,9 @@ router.post('/bookadded', function (req, res, next) {
 });
 
 // ----------------------------
-// BARGAIN BOOKS (UNDER £20)
+// BARGAIN BOOKS (UNDER £20) (protected)
 // ----------------------------
-
-router.get('/bargainbooks', function (req, res, next) {
+router.get('/bargainbooks', redirectLogin, function (req, res, next) {
     const sqlquery = "SELECT * FROM books WHERE price < 20";
 
     db.query(sqlquery, (err, result) => {
@@ -96,9 +99,9 @@ router.get('/bargainbooks', function (req, res, next) {
 });
 
 // ----------------------------
-// EXPORT ROUTER
+// USERS LIST (protected)
 // ----------------------------
-router.get('/users/list', function (req, res, next) {
+router.get('/users/list', redirectLogin, function (req, res, next) {
     const sql = "SELECT username, first, last, email FROM users";
 
     db.query(sql, function (err, results) {
@@ -107,8 +110,10 @@ router.get('/users/list', function (req, res, next) {
     });
 });
 
-
-router.get("/audit", function (req, res, next) {
+// ----------------------------
+// AUDIT LOG (protected)
+// ----------------------------
+router.get("/audit", redirectLogin, function (req, res, next) {
     const sql = "SELECT * FROM audit ORDER BY timestamp DESC";
     db.query(sql, function (err, results) {
         if (err) return next(err);
