@@ -4,16 +4,16 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
-const { check, validationResult } = require("express-validator");
+const { check, validationResult } = require('express-validator');
 
 // ------------------------
 // Middleware: Protect routes
 // ------------------------
 const redirectLogin = (req, res, next) => {
     if (!req.session.userId) {
-        res.redirect("./login");
+        res.redirect("./login"); // redirect to the login page
     } else {
-        next();
+        next(); // move to the next middleware function
     }
 };
 
@@ -31,16 +31,15 @@ router.post(
   "/registered",
   [
     check("email").isEmail().withMessage("Please enter a valid email."),
-    check("username")
-      .isLength({ min: 5, max: 20 })
-      .withMessage("Username must be 5–20 characters."),
+    check("username").isLength({ min: 5, max: 20 }).withMessage("Username must be 5–20 characters."),
     check("password").isLength({ min: 8 }).withMessage("Password must be at least 8 characters."),
     check("first").notEmpty().withMessage("First name is required."),
-    check("last").notEmpty().withMessage("Last name is required."),
+    check("last").notEmpty().withMessage("Last name is required.")
   ],
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      // Pass errors and old input to template
       return res.render("register", {
         errors: errors.array(),
         shopData: { shopName: "My Shop" },
@@ -59,16 +58,14 @@ router.post(
       `;
       const params = [username, first, last, email, hashedPassword];
 
-      db.query(sql, params, (err, result) => {
+      db.query(sql, params, (err) => {
         if (err) return next(err);
 
-        const output = `
+        res.send(`
           <h2>Hello ${first} ${last}, you are now registered!</h2>
           <p>Your password is: ${password}</p>
-          <p>Your hashed password is: ${hashedPassword}</p>
           <p><a href="/users/login">Click here to login</a></p>
-        `;
-        res.send(output);
+        `);
       });
     });
   }
@@ -141,24 +138,9 @@ router.get("/dashboard", redirectLogin, (req, res) => {
 });
 
 // ------------------------
-// GET: Logout (works even if not logged in)
+// GET: Logout (protected)
 // ------------------------
-router.get("/logout", (req, res) => {
-    if (req.session.userId) {
-        req.session.destroy(err => {
-            if (err) return res.redirect("/users/dashboard");
-            res.clearCookie("connect.sid");
-            res.redirect("/users/login");
-        });
-    } else {
-        res.redirect("/users/login");
-    }
-});
-
-// ------------------------
-// POST: Logout (protected)
-// ------------------------
-router.post("/logout", redirectLogin, (req, res) => {
+router.get("/logout", redirectLogin, (req, res) => {
     req.session.destroy(err => {
         if (err) return res.redirect("/users/dashboard");
         res.clearCookie("connect.sid");
