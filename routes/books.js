@@ -27,7 +27,7 @@ router.get('/search-result', redirectLogin, function (req, res, next) {
     const keyword = req.query.keyword;  // get the keyword from the form
 
     if (!keyword || keyword.trim() === "") {
-        return res.send("❌ Please enter a book name to search.");
+        return res.send(" Please enter a book name to search.");
     }
 
     const sqlquery = "SELECT * FROM books WHERE name LIKE ?";
@@ -73,7 +73,7 @@ router.post('/bookadded', redirectLogin, function (req, res, next) {
             next(err);
         } else {
             res.send(`
-                <h2>✅ Book added to database!</h2>
+                <h2> Book added to database!</h2>
                 <p><strong>Name:</strong> ${req.body.name}</p>
                 <p><strong>Price:</strong> £${req.body.price}</p>
                 <p><a href="/books/list">Back to Book List</a></p>

@@ -1,32 +1,22 @@
-// Import modules
+require('dotenv').config(); // Load environment variables
+
 const express = require('express');
 const ejs = require('ejs');
 const path = require('path');
 const mysql = require('mysql2');
 const session = require('express-session');
 const expressSanitizer = require('express-sanitizer');
-
-// Create the express app
 const app = express();
 const port = 8000;
 
 // -----------------
 // Middleware
 // -----------------
-
-// Body parser
 app.use(express.urlencoded({ extended: true }));
-
-// Sanitizer (must come after body parser)
 app.use(expressSanitizer());
-
-// Static folder
 app.use(express.static(path.join(__dirname, 'public')));
-
-// EJS
 app.set('view engine', 'ejs');
 
-// Session
 app.use(session({
     secret: 'somerandomstuff',
     resave: false,
@@ -65,7 +55,11 @@ app.use('/users', usersRoutes);
 const booksRoutes = require('./routes/books');
 app.use('/books', booksRoutes);
 
+// Weather route
+const weatherRouter = require('./routes/weather'); // make sure path is correct
+app.use('/weather', weatherRouter);
+
 // -----------------
 // Start server
 // -----------------
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+app.listen(port, () => console.log(`Server listening on port ${port}!`));
