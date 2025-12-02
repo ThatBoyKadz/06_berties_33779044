@@ -55,6 +55,10 @@ app.use('/users', usersRoutes);
 const booksRoutes = require('./routes/books');
 app.use('/books', booksRoutes);
 
+const apiRoutes = require('./routes/api');
+app.use('/api', apiRoutes); // all API routes will start with /api
+
+
 // Weather route
 const weatherRouter = require('./routes/weather'); // make sure path is correct
 app.use('/weather', weatherRouter);

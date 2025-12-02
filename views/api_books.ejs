@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Books</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: #fff;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .filter-form {
+            margin-bottom: 20px;
+        }
+        .filter-form input {
+            padding: 5px;
+            margin-right: 5px;
+        }
+        .filter-form button {
+            padding: 5px 10px;
+        }
+        .sort-links {
+            margin-bottom: 10px;
+        }
+        .sort-links a {
+            margin-right: 10px;
+            text-decoration: none;
+            color: #3498db;
+            font-weight: bold;
+        }
+        .sort-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Books</h1>
+
+    <!-- Filter form -->
+    <form class="filter-form" action="/api/books" method="get">
+        <input type="text" name="search" placeholder="Search by name" value="<%= search || '' %>">
+        <input type="number" step="0.01" name="minprice" placeholder="Min price" value="<%= minprice || '' %>">
+        <input type="number" step="0.01" name="maxprice" placeholder="Max price" value="<%= maxprice || '' %>">
+        <button type="submit">Filter</button>
+    </form>
+
+    <!-- Sort links -->
+    <div class="sort-links">
+        Sort by:
+        <a href="?<%= search ? 'search=' + search + '&' : '' %><%= minprice ? 'minprice=' + minprice + '&' : '' %><%= maxprice ? 'maxprice=' + maxprice + '&' : '' %>sort=name">Name</a>
+        <a href="?<%= search ? 'search=' + search + '&' : '' %><%= minprice ? 'minprice=' + minprice + '&' : '' %><%= maxprice ? 'maxprice=' + maxprice + '&' : '' %>sort=price">Price</a>
+    </div>
+
+    <!-- Table -->
+    <% if (books.length === 0) { %>
+        <p>No books found.</p>
+    <% } else { %>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Price (£)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% books.forEach(book => { %>
+                    <tr>
+                        <td><%= book.id %></td>
+                        <td><%= book.name %></td>
+                        <td><%= book.price %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    <% } %>
+</body>
+</html>
